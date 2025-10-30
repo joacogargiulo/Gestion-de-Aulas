@@ -1,0 +1,5 @@
+{
+  "name": "Gestión de Aulas UNSTA",
+  "description": "A web application for managing classroom reservations and requests at UNSTA Yerba Buena. It provides separate interfaces for teachers and administrative staff to view schedules, request classrooms, and manage bookings.",
+  "requestFramePermissions": []
+}
