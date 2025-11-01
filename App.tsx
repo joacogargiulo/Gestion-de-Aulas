@@ -1,8 +1,7 @@
-
 import React, { useState, createContext, useContext, useMemo, useCallback, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { User, ClassroomRequest, RequestStatus, Role, Booking } from './types';
-import { MOCK_REQUESTS, MOCK_BOOKINGS, MOCK_USERS } from './data';
+import { User, ClassroomRequest, RequestStatus, Role, Booking, Classroom } from './types'; 
+import { MOCK_USERS } from './data'; 
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -14,11 +13,12 @@ import MyClassesPage from './pages/MyClassesPage';
 import RegistrationPage from './pages/RegistrationPage';
 
 // --- AUTH CONTEXT ---
+// (Esta sección no cambia)
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => User | null;
+  login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
-  registerUser: (userData: Omit<User, 'id'>) => { success: boolean; message: string };
+  registerUser: (userData: Omit<User, 'id'>) => Promise<{ success: boolean; message: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -32,6 +32,7 @@ export const useAuth = () => {
 };
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // (Esta sección no cambia)
   const [users, setUsers] = useState<User[]>(() => {
     try {
       const storedUsers = localStorage.getItem('users');
@@ -48,38 +49,52 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   });
 
   useEffect(() => {
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('users', JSON.stringify(users)); 
   }, [users]);
 
-
-  const login = useCallback((email: string, password: string): User | null => {
-    const foundUser = users.find(u => u.email === email);
-    if (foundUser && foundUser.password === password) {
-      localStorage.setItem('user', JSON.stringify(foundUser));
-      setUser(foundUser);
-      return foundUser;
+  const login = useCallback(async (email: string, password: string): Promise<User | null> => {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        if (!response.ok) return null;
+        const { user: loggedInUser, token } = await response.json();
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(loggedInUser));
+        setUser(loggedInUser);
+        return loggedInUser;
+    } catch (error) {
+        console.error("Error conectando a la API de login:", error);
+        return null;
     }
-    return null;
-  }, [users]);
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token'); 
     setUser(null);
   }, []);
   
-  const registerUser = useCallback((userData: Omit<User, 'id'>) => {
-    const userExists = users.some(u => u.email === userData.email);
-    if (userExists) {
-      return { success: false, message: 'El correo electrónico ya está en uso.' };
+  const registerUser = useCallback(async (userData: Omit<User, 'id'>): Promise<{ success: boolean; message: string }> => {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData),
+        });
+        const data = await response.json();
+        if (response.ok) {
+            return { success: true, message: '¡Registro exitoso! Serás redirigido para iniciar sesión.' };
+        } else {
+            return { success: false, message: data.message || 'Error desconocido al registrar.' };
+        }
+    } catch (error) {
+        console.error("Error conectando a la API de registro:", error);
+        return { success: false, message: 'Error de conexión con el servidor.' };
     }
-    const newUser: User = {
-      id: Date.now(),
-      ...userData,
-    };
-    setUsers(prev => [...prev, newUser]);
-    return { success: true, message: '¡Registro exitoso!' };
-  }, [users]);
-
+  }, []);
 
   const value = useMemo(() => ({ user, login, logout, registerUser }), [user, users, login, logout, registerUser]);
 
@@ -90,10 +105,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 interface DataContextType {
   requests: ClassroomRequest[];
   bookings: Booking[];
-  addRequest: (requestData: { career: string; subject: string; startTime: Date; endTime: Date; reason: string; requestedClassroomId: number; }) => void;
-  approveRequest: (requestToApprove: ClassroomRequest, classroomId: number) => void;
-  rejectRequest: (requestId: number) => void;
-  addBooking: (bookingData: Omit<Booking, 'id'>) => void;
+  classrooms: Classroom[]; 
+  addRequest: (requestData: { career: string; subject: string; startTime: Date; endTime: Date; reason: string; requestedClassroomId: number; }) => Promise<void>; 
+  approveRequest: (requestToApprove: ClassroomRequest, classroomId: number) => Promise<void>;
+  rejectRequest: (requestId: number) => Promise<void>;
+  addBooking: (bookingData: Omit<Booking, 'id'>) => Promise<void>;
+
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -106,119 +123,237 @@ export const useData = () => {
   return context;
 }
 
+// (Funciones de Mapeo mapRequestToFrontend, mapBookingToFrontend, mapClassroomToFrontend no cambian)
+const mapRequestToFrontend = (dbReq: any): ClassroomRequest => {
+    return {
+        id: dbReq.id,
+        userId: dbReq.userid, 
+        subject: dbReq.subject,
+        career: dbReq.career,
+        startTime: new Date(dbReq.starttime), 
+        endTime: new Date(dbReq.endtime), 
+        reason: dbReq.reason,
+        status: dbReq.status,
+        requestedClassroomId: dbReq.requestedclassroomid, 
+        assignedClassroomId: dbReq.assignedclassroomid 
+    };
+};
+const mapBookingToFrontend = (dbBooking: any): Booking => {
+    return {
+        id: dbBooking.id,
+        classroomId: dbBooking.classroomid, 
+        userId: dbBooking.userid, 
+        subject: dbBooking.subject,
+        career: dbBooking.career,
+        startTime: new Date(dbBooking.starttime), 
+        endTime: new Date(dbBooking.endtime), 
+    };
+};
+const mapClassroomToFrontend = (dbClassroom: any): Classroom => {
+    return {
+        id: dbClassroom.id,
+        name: dbClassroom.name,
+        capacity: dbClassroom.capacity,
+        hasProjector: dbClassroom.hasprojector, 
+        studentComputers: dbClassroom.studentcomputers, 
+        hasAirConditioning: dbClassroom.hasairconditioning, 
+        faculty: dbClassroom.faculty,
+    };
+};
+
 const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user } = useAuth();
-    const [requests, setRequests] = useState<ClassroomRequest[]>(() => {
-      try {
-        const storedRequests = localStorage.getItem('requests');
-        if (storedRequests) {
-          const parsed = JSON.parse(storedRequests) as ClassroomRequest[];
-          // Dates are stored as strings in JSON, so we need to convert them back to Date objects
-          return parsed.map(req => ({
-            ...req,
-            startTime: new Date(req.startTime),
-            endTime: new Date(req.endTime),
-          }));
+    const [requests, setRequests] = useState<ClassroomRequest[]>([]); 
+    const [bookings, setBookings] = useState<Booking[]>([]); 
+    const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+
+    // Función auxiliar para fetch (actualizada para manejar body y JSON)
+    const fetchData = useCallback(async (endpoint: string, options: RequestInit = {}) => {
+        const token = localStorage.getItem('token'); 
+        if (!token) throw new Error("Token de autenticación faltante.");
+        
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers,
+            },
+        });
+
+        if (!response.ok) {
+             const errorData = await response.json().catch(() => ({ message: `Error ${response.status}` })); // Intenta parsear JSON, si falla, usa status
+            throw new Error(errorData.message || `Error ${response.status} al procesar ${endpoint}`);
         }
-      } catch (error) {
-        console.error("Failed to parse requests from localStorage", error);
-      }
-      return MOCK_REQUESTS;
-    });
-
-    const [bookings, setBookings] = useState<Booking[]>(() => {
-      try {
-        const storedBookings = localStorage.getItem('bookings');
-        if (storedBookings) {
-          const parsed = JSON.parse(storedBookings) as Booking[];
-          // Dates are stored as strings in JSON, so we need to convert them back to Date objects
-          return parsed.map(book => ({
-            ...book,
-            startTime: new Date(book.startTime),
-            endTime: new Date(book.endTime),
-          }));
+        
+        // Manejar respuestas 204 (No Content) o 200 (OK) que pueden no tener cuerpo
+        if (response.status === 204) {
+            return { success: true };
         }
-      } catch (error) {
-        console.error("Failed to parse bookings from localStorage", error);
-      }
-      return MOCK_BOOKINGS;
-    });
+        
+        try {
+            return await response.json();
+        } catch (e) {
+            // Si la respuesta es OK pero no hay JSON (ej. un PUT simple)
+            return { success: true }; 
+        }
+    }, []);
 
-    useEffect(() => {
-      localStorage.setItem('requests', JSON.stringify(requests));
-    }, [requests]);
+    // --- LECTURA DE DATOS (GET) ---
+    // (fetchClassrooms, fetchBookings, fetchRequests no cambian)
+    const fetchClassrooms = useCallback(async () => {
+        try {
+            const data = await fetchData('/api/classrooms') as any[];
+            setClassrooms(data.map(mapClassroomToFrontend)); 
+        } catch (error) {
+            console.error("Error al cargar aulas:", error);
+        }
+    }, [fetchData]);
 
-    useEffect(() => {
-      localStorage.setItem('bookings', JSON.stringify(bookings));
-    }, [bookings]);
+    const fetchBookings = useCallback(async () => {
+        try {
+            const data = await fetchData('/api/bookings') as any[];
+            setBookings(data.map(mapBookingToFrontend));
+        } catch (error) {
+            console.error("Error al cargar reservas:", error);
+        }
+    }, [fetchData]);
 
-    const addRequest = useCallback((requestData: { career: string; subject: string; startTime: Date; endTime: Date; reason: string; requestedClassroomId: number; }) => {
+    const fetchRequests = useCallback(async () => {
         if (!user) return;
-        const newRequest: ClassroomRequest = {
-            id: Date.now(),
-            userId: user.id,
-            ...requestData,
-            status: RequestStatus.PENDIENTE,
-        };
-        setRequests(prev => [newRequest, ...prev]);
-    }, [user]);
+        const endpoint = user.role === Role.SECRETARIA ? '/api/requests' : '/api/requests/my';
+        try {
+            const data = await fetchData(endpoint) as any[];
+            setRequests(data.map(mapRequestToFrontend));
+        } catch (error) {
+            console.error("Error al cargar solicitudes:", error);
+        }
+    }, [fetchData, user]);
+
+
+    // --- DISPARADORES DE CARGA ---
+    useEffect(() => {
+        if (user) {
+            fetchClassrooms();
+            fetchBookings();
+            fetchRequests(); 
+        } else {
+            setBookings([]); 
+            setRequests([]);
+            setClassrooms([]);
+        }
+    }, [user, fetchClassrooms, fetchBookings, fetchRequests]); 
     
-    const approveRequest = useCallback((requestToApprove: ClassroomRequest, classroomId: number) => {
-        // 1. Update the request status
-        const updatedRequest: ClassroomRequest = {
-            ...requestToApprove,
-            status: RequestStatus.APROBADA,
-            assignedClassroomId: classroomId,
-        };
-        setRequests(prev => prev.map(r => r.id === updatedRequest.id ? updatedRequest : r));
+    // --- ESCRITURA DE DATOS (POST/PUT) ---
 
-        // 2. Create a new booking from the approved request
-        const newBooking: Booking = {
-            id: Date.now() + 1, // Ensure unique ID
-            classroomId: classroomId,
-            userId: requestToApprove.userId,
-            subject: requestToApprove.subject,
-            career: requestToApprove.career,
-            startTime: requestToApprove.startTime,
-            endTime: requestToApprove.endTime,
-        };
-        setBookings(prev => [...prev, newBooking]);
-    }, []);
+    // (addRequest no cambia)
+    const addRequest = useCallback(async (requestData: { career: string; subject: string; startTime: Date; endTime: Date; reason: string; requestedClassroomId: number; }) => {
+        const token = localStorage.getItem('token');
+        if (!user || !token) {
+            console.error("Usuario no autenticado o token faltante.");
+            return;
+        }
+        try {
+            const payload = {
+                ...requestData,
+                startTime: requestData.startTime.toISOString(), 
+                endTime: requestData.endTime.toISOString(),
+            };
+            
+            await fetchData('/api/requests', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            });
+            alert('¡Solicitud enviada con éxito!'); 
+            await fetchRequests(); // Recargar la lista
+        } catch (error: any) {
+            console.error("Error de red al enviar solicitud:", error);
+            alert(`Error al enviar solicitud: ${error.message}`);
+        }
+    }, [user, fetchRequests, fetchData]);
+    
+    // **** CAMBIO: Implementación de approveRequest con API ****
+    const approveRequest = useCallback(async (requestToApprove: ClassroomRequest, classroomId: number) => {
+        try {
+            // Llama al nuevo endpoint PUT
+            await fetchData(`/api/requests/${requestToApprove.id}/approve`, {
+                method: 'PUT',
+                body: JSON.stringify({ classroomId: classroomId }) // Envía el ID del aula seleccionada
+            });
+            
+            // Refresca ambas listas (solicitudes Y reservas)
+            // porque aprobar crea una nueva reserva
+            await fetchRequests();
+            await fetchBookings();
+            
+        } catch (error: any) {
+            console.error("Error al aprobar solicitud:", error);
+            alert(`Error al aprobar solicitud: ${error.message}`);
+        }
+    }, [fetchData, fetchRequests, fetchBookings]);
 
-    const rejectRequest = useCallback((requestId: number) => {
-        setRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: RequestStatus.RECHAZADA } : r));
-    }, []);
+    // **** CAMBIO: Implementación de rejectRequest con API ****
+    const rejectRequest = useCallback(async (requestId: number) => {
+        try {
+            // Llama al nuevo endpoint PUT
+            await fetchData(`/api/requests/${requestId}/reject`, {
+                method: 'PUT'
+                // No necesita body, solo el ID en la URL
+            });
+            
+            // Refresca solo la lista de solicitudes
+            await fetchRequests();
+            
+        } catch (error: any) {
+            console.error("Error al rechazar solicitud:", error);
+            alert(`Error al rechazar solicitud: ${error.message}`);
+        }
+    }, [fetchData, fetchRequests]);
 
-    const addBooking = useCallback((bookingData: Omit<Booking, 'id'>) => {
-        const newBooking: Booking = {
-            id: Date.now(),
-            ...bookingData,
-        };
-        setBookings(prev => [...prev, newBooking]);
-    }, []);
+    const addBooking = useCallback(async (bookingData: Omit<Booking, 'id'>) => {
+        // La simulación anterior fue eliminada.
+        try {
+            // Convertimos las fechas a ISO string para el JSON
+            const payload = {
+                ...bookingData,
+                startTime: bookingData.startTime.toISOString(),
+                endTime: bookingData.endTime.toISOString(),
+            };
 
-    const value = useMemo(() => ({ requests, bookings, addRequest, approveRequest, rejectRequest, addBooking }), [requests, bookings, addRequest, approveRequest, rejectRequest, addBooking]);
+            await fetchData('/api/bookings', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            // Refrescar la lista de reservas
+            await fetchBookings();
+            alert(`Reserva creada con éxito.`);
+
+        } catch (error: any) {
+            console.error("Error al crear reserva directa:", error);
+            alert(`Error al crear reserva: ${error.message}`);
+        }
+    }, [fetchData, fetchBookings]);
+
+    const value = useMemo(() => ({ requests, bookings, classrooms, addRequest, approveRequest, rejectRequest, addBooking }), [requests, bookings, classrooms, addRequest, approveRequest, rejectRequest, addBooking]);
 
     return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }
 
 
 // --- APP SETUP ---
+// (Esta sección no cambia)
 const ProtectedRoute: React.FC<{ children: React.ReactNode, roles?: string[] }> = ({ children, roles }) => {
   const { user } = useAuth();
   const location = useLocation();
-
   if (!user) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
-
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }
-
   return <>{children}</>;
 };
-
 
 function App() {
   return (
@@ -278,3 +413,4 @@ function App() {
 }
 
 export default App;
+

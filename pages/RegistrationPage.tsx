@@ -6,7 +6,7 @@ import Logo from '../components/Logo';
 
 const RegistrationPage: React.FC = () => {
     const navigate = useNavigate();
-    const { registerUser } = useAuth();
+    const { registerUser } = useAuth(); // Esta es la función ASYNC de App.tsx
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -17,7 +17,8 @@ const RegistrationPage: React.FC = () => {
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // **** CAMBIO CLAVE: Convertir handleSubmit a una función async ****
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setSuccess('');
@@ -33,18 +34,31 @@ const RegistrationPage: React.FC = () => {
         }
 
         setIsLoading(true);
-        setTimeout(() => {
-            const result = registerUser({ name, email, password, role });
+        
+        // **** CAMBIO CLAVE: Eliminar el setTimeout y usar await ****
+        try {
+            // Llamamos a la API y esperamos la respuesta
+            const result = await registerUser({ name, email, password, role });
+            
             if (result.success) {
                 setSuccess('¡Registro exitoso! Serás redirigido para iniciar sesión.');
+                // Redirigimos al login después de 2 segundos
                 setTimeout(() => {
-                    navigate(`/login?role=${role}`);
+                    navigate(`/login`); // Ya no pasamos ?role=
                 }, 2000);
             } else {
+                // El backend devolvió un error (ej. email duplicado)
                 setError(result.message);
                 setIsLoading(false);
             }
-        }, 1000);
+        } catch (apiError) {
+            // Error de red o conexión
+            setError('Error de conexión con el servidor.');
+            setIsLoading(false);
+        }
+        
+        // No necesitamos 'finally' porque setIsLoading(false) se maneja
+        // en los casos de error. El caso exitoso navega fuera.
     };
 
     return (

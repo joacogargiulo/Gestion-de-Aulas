@@ -6,7 +6,7 @@ import Logo from '../components/Logo';
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, user } = useAuth();
+  const { login, user } = useAuth(); // login ahora es asíncrono
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,23 +19,25 @@ const LoginPage: React.FC = () => {
     }
   }, [user, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // CAMBIO CLAVE: Función hecha ASÍNCRONA para usar el login del AuthContext
+  const handleSubmit = async (e: React.FormEvent) => { 
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      const loggedInUser = login(email, password);
+    // ELIMINAMOS la simulación con setTimeout
 
-      if (loggedInUser) {
-        const from = location.state?.from?.pathname || '/dashboard';
-        navigate(from, { replace: true });
-      } else {
-        setError('Credenciales inválidas. Por favor, intente de nuevo.');
-      }
-      setIsLoading(false);
-    }, 1000);
+    // Llamada real al backend a través de useAuth().login
+    const loggedInUser = await login(email, password);
+
+    if (loggedInUser) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    } else {
+      // Este error se muestra si el backend devuelve 401
+      setError('Credenciales inválidas. Por favor, intente de nuevo.');
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -67,6 +69,7 @@ const LoginPage: React.FC = () => {
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
               placeholder="usuario@facultad.com"
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -81,6 +84,7 @@ const LoginPage: React.FC = () => {
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
               placeholder="password123"
+              disabled={isLoading}
             />
           </div>
           <div>
