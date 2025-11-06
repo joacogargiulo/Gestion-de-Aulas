@@ -1,9 +1,11 @@
 
 
 
+
 import { Role, User, Classroom, Booking, ClassroomRequest, RequestStatus, Faculty } from './types';
-// FIX: Consolidate date-fns imports to resolve "not callable" error.
-import { addDays, set } from 'date-fns';
+// FIX: Import 'set' from submodule to resolve module export error.
+import { addDays } from 'date-fns';
+import set from 'date-fns/set';
 
 const now = new Date();
 

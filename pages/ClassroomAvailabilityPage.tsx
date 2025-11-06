@@ -1,11 +1,9 @@
 
-
-
-
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-// FIX: Consolidate date-fns imports to resolve "not callable" error.
-import { areIntervalsOverlapping, format, set } from 'date-fns';
+// FIX: Import 'set' from submodule to resolve module export error.
+import { areIntervalsOverlapping, format } from 'date-fns';
+import set from 'date-fns/set';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
 import es from 'date-fns/locale/es';
 import { MOCK_CLASSROOMS, MOCK_USERS, TIME_SLOTS } from '../data';
@@ -14,6 +12,7 @@ import { useData } from '../contexts/DataContext';
 import { Classroom, Role, Faculty } from '../types';
 import RequestAulaModal from '../components/RequestAulaModal';
 import CreateBookingModal from '../components/CreateBookingModal';
+import Alert from '../components/ui/Alert';
 
 const ClassroomAvailabilityPage: React.FC = () => {
     const { faculty = Faculty.ENGINEERING, dateString = new Date().toISOString(), timeSlotIndex = '0' } = useParams<{ faculty: Faculty; dateString: string; timeSlotIndex: string; }>();
@@ -23,6 +22,7 @@ const ClassroomAvailabilityPage: React.FC = () => {
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(null);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const selectedDate = new Date(dateString);
     const timeSlot = TIME_SLOTS[parseInt(timeSlotIndex, 10)];
@@ -68,7 +68,8 @@ const ClassroomAvailabilityPage: React.FC = () => {
         });
         setIsRequestModalOpen(false);
         setSelectedClassroom(null);
-        alert('¡Solicitud enviada con éxito! Podrá ver su estado en la sección "Mis Solicitudes".');
+        setSuccessMessage('¡Solicitud enviada con éxito! Podrá ver su estado en la sección "Mis Solicitudes".');
+        setTimeout(() => setSuccessMessage(''), 5000);
     };
 
     const handleBookingSubmit = (formData: { career: string; subject: string; userId: number }) => {
@@ -81,7 +82,8 @@ const ClassroomAvailabilityPage: React.FC = () => {
         });
         setIsBookingModalOpen(false);
         setSelectedClassroom(null);
-        alert(`Clase "${formData.subject}" creada con éxito en el aula ${selectedClassroom.name}.`);
+        setSuccessMessage(`Clase "${formData.subject}" creada con éxito en el aula ${selectedClassroom.name}.`);
+        setTimeout(() => setSuccessMessage(''), 5000);
     };
 
     const initialRequestData = useMemo(() => {
@@ -117,6 +119,8 @@ const ClassroomAvailabilityPage: React.FC = () => {
                 </p>
             </div>
             
+            <Alert type="success" message={successMessage} />
+
             <div className="space-y-4">
                 {classroomRows.map((row, rowIndex) => (
                     <div key={rowIndex} className="grid grid-cols-6 gap-3 md:gap-4">

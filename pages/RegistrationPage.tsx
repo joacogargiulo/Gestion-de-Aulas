@@ -3,6 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Role } from '../types';
 import Logo from '../components/Logo';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Input from '../components/ui/Input';
+import Label from '../components/ui/Label';
 
 const RegistrationPage: React.FC = () => {
     const navigate = useNavigate();
@@ -57,46 +61,37 @@ const RegistrationPage: React.FC = () => {
                     <h1 className="text-2xl font-bold">Crear Nueva Cuenta</h1>
                 </div>
                 
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-6" role="alert">
-                        <p>{error}</p>
-                    </div>
-                )}
-
-                {success && (
-                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md mb-6" role="alert">
-                        <p>{success}</p>
-                    </div>
-                )}
+                <Alert type="error" message={error} />
+                <Alert type="success" message={success} />
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="name" className="text-sm font-medium text-gray-700 block mb-2">Nombre Completo</label>
-                        <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900" />
+                        <Label htmlFor="name">Nombre Completo</Label>
+                        <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
                     </div>
                      <div>
-                        <label htmlFor="email" className="text-sm font-medium text-gray-700 block mb-2">Email</label>
-                        <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900" />
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
                     <div>
-                        <label htmlFor="password" className="text-sm font-medium text-gray-700 block mb-2">Contraseña</label>
-                        <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900" />
+                        <Label htmlFor="password">Contraseña</Label>
+                        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                     <div>
-                        <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 block mb-2">Confirmar Contraseña</label>
-                        <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900" />
+                        <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                        <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                     </div>
                     <div>
-                        <label htmlFor="role" className="text-sm font-medium text-gray-700 block mb-2">Rol</label>
+                        <Label htmlFor="role">Rol</Label>
                         <select id="role" value={role} onChange={e => setRole(e.target.value as Role)} className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900">
                             <option value={Role.DOCENTE}>Docente</option>
                             <option value={Role.SECRETARIA}>Secretaría</option>
                         </select>
                     </div>
                     <div>
-                        <button type="submit" disabled={isLoading || !!success} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                        <Button type="submit" isLoading={isLoading} disabled={!!success} className="w-full">
                             {isLoading ? 'Registrando...' : 'Registrarse'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
                 <div className="text-center mt-6">

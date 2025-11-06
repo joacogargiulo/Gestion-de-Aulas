@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import { Role } from '../types';
+import Button from './ui/Button';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -58,12 +58,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                <span className="text-gray-300 text-sm mr-4 hidden sm:block">
                 Bienvenido, {user?.name}
               </span>
-              <button
+              <Button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                variant="danger"
+                className="px-3 py-2"
               >
                 Cerrar sesión
-              </button>
+              </Button>
             </div>
           </div>
         </div>

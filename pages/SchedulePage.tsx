@@ -5,11 +5,14 @@
 
 
 
+
 import React, { useState, useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { MOCK_CLASSROOMS, TIME_SLOTS } from '../data';
-// FIX: Consolidate date-fns imports to resolve "not callable" error.
-import { addDays, areIntervalsOverlapping, eachDayOfInterval, endOfWeek, format, isSameDay, set, startOfDay } from 'date-fns';
+// FIX: Import 'set' and 'startOfDay' from their submodules to resolve module export errors.
+import { addDays, areIntervalsOverlapping, eachDayOfInterval, endOfWeek, format, isSameDay } from 'date-fns';
+import set from 'date-fns/set';
+import startOfDay from 'date-fns/startOfDay';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
 import es from 'date-fns/locale/es';
 import { Faculty } from '../types';

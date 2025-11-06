@@ -5,13 +5,15 @@
 
 
 
+
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { Booking } from '../types';
 import { MOCK_CLASSROOMS } from '../data';
-// FIX: Consolidate date-fns imports to resolve "not callable" error.
-import { addDays, endOfWeek, format, isWithinInterval, startOfDay } from 'date-fns';
+// FIX: Import 'startOfDay' from submodule to resolve module export error.
+import { addDays, endOfWeek, format, isWithinInterval } from 'date-fns';
+import startOfDay from 'date-fns/startOfDay';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
 import es from 'date-fns/locale/es';
 

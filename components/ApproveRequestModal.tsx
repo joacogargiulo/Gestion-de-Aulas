@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
 import es from 'date-fns/locale/es';
 import { useAuth } from '../contexts/AuthContext';
+import Button from './ui/Button';
 
 interface ApproveRequestModalProps {
   isOpen: boolean;
@@ -94,9 +95,9 @@ const ApproveRequestModal: React.FC<ApproveRequestModalProps> = ({ isOpen, onClo
           <button onClick={onClose} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">
             Cancelar
           </button>
-          <button onClick={handleConfirm} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+          <Button onClick={handleConfirm} variant="success">
             Confirmar Aprobación
-          </button>
+          </Button>
         </div>
       </div>
     </div>

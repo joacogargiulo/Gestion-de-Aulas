@@ -5,6 +5,8 @@ import { Classroom, Faculty } from '../types';
 import { format } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
 import es from 'date-fns/locale/es';
+import Button from './ui/Button';
+import Alert from './ui/Alert';
 
 interface RequestAulaModalProps {
   isOpen: boolean;
@@ -120,11 +122,7 @@ const RequestAulaModal: React.FC<RequestAulaModalProps> = ({ isOpen, onClose, on
                         )}
                     </div>
                 )}
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-4" role="alert">
-                        <p>{error}</p>
-                    </div>
-                )}
+                <Alert type="error" message={error} />
                 <form onSubmit={handleSubmit} noValidate>
                     <div className="space-y-4">
                          <div>
@@ -154,9 +152,9 @@ const RequestAulaModal: React.FC<RequestAulaModalProps> = ({ isOpen, onClose, on
                         <button type="button" onClick={handleClose} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">
                             Cancelar
                         </button>
-                        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                        <Button type="submit">
                             Enviar Solicitud
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>

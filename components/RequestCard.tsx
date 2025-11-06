@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import es from 'date-fns/locale/es';
 import StatusBadge from './StatusBadge';
 import { useAuth } from '../contexts/AuthContext';
+import Button from './ui/Button';
 
 const RequestCard: React.FC<{ 
     request: ClassroomRequest, 
@@ -46,16 +47,18 @@ const RequestCard: React.FC<{
       </div>
       {isSecretariaView && request.status === RequestStatus.PENDIENTE && (
         <div className="mt-4 flex justify-end space-x-3">
-          <button 
+          <Button 
+            variant="danger"
             onClick={() => onReject && onReject(request.id)}
-            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700">
+          >
             Rechazar
-          </button>
-          <button 
+          </Button>
+          <Button 
+            variant="success"
             onClick={() => onApprove && onApprove(request)}
-            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">
+          >
             Aprobar
-          </button>
+          </Button>
         </div>
       )}
     </div>

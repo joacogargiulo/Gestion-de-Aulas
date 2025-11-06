@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import Button from '../components/ui/Button';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,12 +21,12 @@ const LandingPage: React.FC = () => {
       </div>
 
       <div className="mt-12 space-y-5 w-full max-w-sm">
-        <button
+        <Button
           onClick={handleNavigation}
-          className="w-full bg-indigo-800 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105"
+          className="w-full font-bold py-4 px-4 rounded-lg shadow-lg transition-transform transform hover:scale-105"
         >
           Iniciar sesión
-        </button>
+        </Button>
       </div>
     </div>
   );

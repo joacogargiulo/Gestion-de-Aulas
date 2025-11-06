@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '../components/Logo';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import Input from '../components/ui/Input';
+import Label from '../components/ui/Label';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +28,6 @@ const LoginPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
     setTimeout(() => {
       const loggedInUser = login(email, password);
 
@@ -48,49 +51,39 @@ const LoginPage: React.FC = () => {
             <h1 className="text-2xl font-bold">Inicio de Sesión</h1>
         </div>
         
-        {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-6" role="alert">
-                <p>{error}</p>
-            </div>
-        )}
+        <Alert type="error" message={error} />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-700 block mb-2">
-              Email
-            </label>
-            <input
+            <Label htmlFor="email">Email</Label>
+            <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
               placeholder="usuario@facultad.com"
             />
           </div>
           <div>
-            <label htmlFor="password" className="text-sm font-medium text-gray-700 block mb-2">
-              Contraseña
-            </label>
-            <input
+            <Label htmlFor="password">Contraseña</Label>
+            <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
               placeholder="password123"
             />
           </div>
           <div>
-            <button
+            <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-700 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+              isLoading={isLoading}
+              className="w-full"
             >
               {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
-            </button>
+            </Button>
           </div>
         </form>
          <div className="text-center mt-6">
