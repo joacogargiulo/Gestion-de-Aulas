@@ -35,7 +35,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode, roles?: string[] }> 
 function App() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.shiftKey && event.key === '6') {
+      // FIX: Changed shortcut to Alt+Shift+R and using event.code for reliability.
+      if (event.altKey && event.shiftKey && event.code === 'KeyR') {
         const isConfirmed = window.confirm(
           '¿Está seguro de que desea borrar TODOS los datos locales (usuarios, solicitudes, reservas)? La aplicación se recargará con los datos de prueba iniciales.'
         );
