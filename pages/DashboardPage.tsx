@@ -6,9 +6,10 @@
 
 
 
+
 import React, { useState, useMemo } from 'react';
 // FIX: Import 'set' and 'startOfDay' from their submodules to resolve export errors.
-import { addDays, areIntervalsOverlapping, eachDayOfInterval, endOfWeek, format } from 'date-fns';
+import { addDays, areIntervalsOverlapping, eachDayOfInterval, endOfWeek, format, isSameDay } from 'date-fns';
 import set from 'date-fns/set';
 import startOfDay from 'date-fns/startOfDay';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
@@ -24,6 +25,9 @@ const DashboardPage: React.FC = () => {
     const { bookings } = useData();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedFaculty, setSelectedFaculty] = useState<Faculty>(Faculty.ENGINEERING);
+    
+    const now = new Date();
+    const today = startOfDay(now);
 
     const facultyClassrooms = useMemo(() => {
         return MOCK_CLASSROOMS.filter(c => c.faculty === selectedFaculty);
@@ -122,7 +126,18 @@ const DashboardPage: React.FC = () => {
                                 {slot.label}
                             </div>
                             {weekDays.map(day => {
+                                const slotEnd = set(day, { hours: slot.end.h, minutes: slot.end.m });
+                                const isPast = day < today || (isSameDay(day, now) && slotEnd < now);
                                 const available = calculateAvailability(day, slot);
+
+                                if(isPast) {
+                                    return (
+                                        <div key={day.toISOString()} className="block bg-gray-200 p-3 text-center rounded-lg cursor-not-allowed opacity-60">
+                                            <span className="font-semibold text-gray-500">-</span>
+                                        </div>
+                                    );
+                                }
+
                                 return (
                                     <Link 
                                         key={day.toISOString()}

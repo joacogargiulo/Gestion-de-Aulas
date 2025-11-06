@@ -20,6 +20,9 @@ const RequestCard: React.FC<{
   const classroom = MOCK_CLASSROOMS.find(c => c.id === request.assignedClassroomId);
   const requestedClassroom = MOCK_CLASSROOMS.find(c => c.id === request.requestedClassroomId);
 
+  const now = new Date();
+  const isRequestInThePast = request.startTime < now;
+
   return (
     <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-indigo-500">
       <div className="flex justify-between items-start">
@@ -56,6 +59,8 @@ const RequestCard: React.FC<{
           <Button 
             variant="success"
             onClick={() => onApprove && onApprove(request)}
+            disabled={isRequestInThePast}
+            title={isRequestInThePast ? "No se puede aprobar una solicitud para una fecha pasada." : ''}
           >
             Aprobar
           </Button>

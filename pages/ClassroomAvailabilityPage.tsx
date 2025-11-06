@@ -1,8 +1,9 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 // FIX: Import 'set' from submodule to resolve module export error.
-import { areIntervalsOverlapping, format } from 'date-fns';
+import { areIntervalsOverlapping, format, isSameDay, startOfDay } from 'date-fns';
 import set from 'date-fns/set';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
 import es from 'date-fns/locale/es';
@@ -26,10 +27,14 @@ const ClassroomAvailabilityPage: React.FC = () => {
 
     const selectedDate = new Date(dateString);
     const timeSlot = TIME_SLOTS[parseInt(timeSlotIndex, 10)];
+    const now = new Date();
 
     // FIX: Replaced setHours and setMinutes with set to resolve import errors.
     const slotStart = set(selectedDate, { hours: timeSlot.start.h, minutes: timeSlot.start.m });
     const slotEnd = set(selectedDate, { hours: timeSlot.end.h, minutes: timeSlot.end.m });
+    
+    const isSlotInThePast = selectedDate < startOfDay(now) || (isSameDay(selectedDate, now) && slotEnd < now);
+
 
     const overlappingBookings = bookings.filter(booking =>
         areIntervalsOverlapping(
@@ -49,7 +54,7 @@ const ClassroomAvailabilityPage: React.FC = () => {
 
     const handleClassroomClick = (classroom: Classroom) => {
         const isAvailable = getClassroomStatus(classroom.id) === 'Disponible';
-        if (!isAvailable) return;
+        if (!isAvailable || isSlotInThePast) return;
 
         setSelectedClassroom(classroom);
 
@@ -119,6 +124,9 @@ const ClassroomAvailabilityPage: React.FC = () => {
                 </p>
             </div>
             
+            {isSlotInThePast && (
+                <Alert type="error" message="No se pueden realizar reservas ni solicitudes para fechas u horas pasadas." />
+            )}
             <Alert type="success" message={successMessage} />
 
             <div className="space-y-4">
@@ -126,12 +134,21 @@ const ClassroomAvailabilityPage: React.FC = () => {
                     <div key={rowIndex} className="grid grid-cols-6 gap-3 md:gap-4">
                         {row.map(classroom => {
                             const isAvailable = getClassroomStatus(classroom.id) === 'Disponible';
+                            let buttonClasses = 'p-4 rounded-lg text-white font-bold text-lg shadow-md transition-transform transform';
+                            if (isSlotInThePast) {
+                                buttonClasses += ' bg-gray-400 cursor-not-allowed';
+                            } else if (isAvailable) {
+                                buttonClasses += ' bg-green-500 hover:bg-green-600 hover:scale-110 cursor-pointer';
+                            } else {
+                                buttonClasses += ' bg-red-500 cursor-not-allowed opacity-70';
+                            }
+
                             return (
                                 <button
                                     key={classroom.id}
                                     onClick={() => handleClassroomClick(classroom)}
-                                    disabled={!isAvailable}
-                                    className={`p-4 rounded-lg text-white font-bold text-lg shadow-md transition-transform transform  ${isAvailable ? 'bg-green-500 hover:bg-green-600 hover:scale-110 cursor-pointer' : 'bg-red-500 cursor-not-allowed opacity-70'}`}
+                                    disabled={!isAvailable || isSlotInThePast}
+                                    className={buttonClasses}
                                 >
                                     {classroom.name}
                                 </button>
