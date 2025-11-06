@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,7 +41,7 @@ const LoginPage: React.FC = () => {
       setIsLoading(false);
     }, 1000);
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center p-4">
       <div className="max-w-md w-full mx-auto bg-white p-8 rounded-xl shadow-lg">

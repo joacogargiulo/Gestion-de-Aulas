@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Role, User } from './types';
 import LandingPage from './pages/LandingPage';
@@ -33,6 +33,27 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode, roles?: string[] }> 
 
 
 function App() {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.shiftKey && event.key === '6') {
+        const isConfirmed = window.confirm(
+          '¿Está seguro de que desea borrar TODOS los datos locales (usuarios, solicitudes, reservas)? La aplicación se recargará con los datos de prueba iniciales.'
+        );
+        if (isConfirmed) {
+          localStorage.clear();
+          alert('Los datos han sido restaurados. La página se recargará.');
+          window.location.reload();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <AuthProvider>
       <DataProvider>
