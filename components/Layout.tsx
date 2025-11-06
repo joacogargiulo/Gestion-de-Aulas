@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
+import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import { Role } from '../types';
 

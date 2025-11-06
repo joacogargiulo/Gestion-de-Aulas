@@ -1,14 +1,17 @@
 
 
 
+
+
+
+
 import React, { useState, useMemo } from 'react';
-import { useData } from '../App';
+import { useData } from '../contexts/DataContext';
 import { MOCK_CLASSROOMS, TIME_SLOTS } from '../data';
-// FIX: Replaced subDays, startOfWeek, setHours, setMinutes and updated imports.
-// FIX: Using top-level imports for date-fns to fix module resolution errors.
-import { addDays, endOfWeek, format, eachDayOfInterval, set, areIntervalsOverlapping, isSameDay, startOfDay } from 'date-fns';
+// FIX: Consolidate date-fns imports to resolve "not callable" error.
+import { addDays, areIntervalsOverlapping, eachDayOfInterval, endOfWeek, format, isSameDay, set, startOfDay } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
-import { es } from 'date-fns/locale';
+import es from 'date-fns/locale/es';
 import { Faculty } from '../types';
 
 const SchedulePage: React.FC = () => {

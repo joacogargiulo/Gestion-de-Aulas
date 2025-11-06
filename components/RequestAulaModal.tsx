@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { MOCK_FACULTIES_CAREERS, MOCK_CAREER_SUBJECTS } from '../data';
 import { Classroom, Faculty } from '../types';
+// FIX: Changed date-fns import to resolve "not callable" error.
 import { format } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
-import { es } from 'date-fns/locale';
+import es from 'date-fns/locale/es';
 
 interface RequestAulaModalProps {
   isOpen: boolean;

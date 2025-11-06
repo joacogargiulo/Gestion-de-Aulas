@@ -1,15 +1,19 @@
 
 
 
+
+
+
+
 import React, { useState, useMemo } from 'react';
-import { useAuth, useData } from '../App';
+import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
 import { Booking } from '../types';
 import { MOCK_CLASSROOMS } from '../data';
-// FIX: Replaced startOfWeek, subDays and updated imports.
-// FIX: Using top-level imports for date-fns to fix module resolution errors.
-import { format, endOfWeek, isWithinInterval, addDays, startOfDay } from 'date-fns';
+// FIX: Consolidate date-fns imports to resolve "not callable" error.
+import { addDays, endOfWeek, format, isWithinInterval, startOfDay } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
-import { es } from 'date-fns/locale';
+import es from 'date-fns/locale/es';
 
 interface GroupedBookings {
   [key: string]: Booking[];

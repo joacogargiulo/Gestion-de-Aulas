@@ -1,13 +1,16 @@
 
 
+
+
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-// FIX: Using top-level imports for date-fns to fix module resolution errors.
+// FIX: Consolidate date-fns imports to resolve "not callable" error.
 import { areIntervalsOverlapping, format, set } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
-import { es } from 'date-fns/locale';
+import es from 'date-fns/locale/es';
 import { MOCK_CLASSROOMS, MOCK_USERS, TIME_SLOTS } from '../data';
-import { useAuth, useData } from '../App';
+import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
 import { Classroom, Role, Faculty } from '../types';
 import RequestAulaModal from '../components/RequestAulaModal';
 import CreateBookingModal from '../components/CreateBookingModal';

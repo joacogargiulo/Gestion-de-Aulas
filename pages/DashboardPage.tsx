@@ -1,14 +1,17 @@
 
 
 
+
+
+
 import React, { useState, useMemo } from 'react';
-// FIX: Replaced subDays, startOfWeek, setHours, setMinutes and updated imports.
-// FIX: Using top-level imports for date-fns to fix module resolution errors.
-import { addDays, endOfWeek, format, eachDayOfInterval, set, areIntervalsOverlapping, startOfDay } from 'date-fns';
+// FIX: Consolidate date-fns imports to resolve "not callable" error.
+import { addDays, areIntervalsOverlapping, eachDayOfInterval, endOfWeek, format, set, startOfDay } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
-import { es } from 'date-fns/locale';
+import es from 'date-fns/locale/es';
 import { MOCK_CLASSROOMS, TIME_SLOTS } from '../data';
-import { useAuth, useData } from '../App';
+import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
 import { Role, Faculty } from '../types';
 import { Link } from 'react-router-dom';
 

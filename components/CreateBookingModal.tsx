@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Classroom, Role, Faculty } from '../types';
-import { MOCK_USERS, MOCK_FACULTIES_CAREERS, MOCK_CAREER_SUBJECTS } from '../data';
+import { MOCK_FACULTIES_CAREERS, MOCK_CAREER_SUBJECTS } from '../data';
+// FIX: Changed date-fns import to resolve "not callable" error.
 import { format } from 'date-fns';
 // FIX: Corrected locale import path for date-fns v2 compatibility.
-import { es } from 'date-fns/locale';
+import es from 'date-fns/locale/es';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CreateBookingModalProps {
   isOpen: boolean;
@@ -15,7 +17,8 @@ interface CreateBookingModalProps {
 }
 
 const CreateBookingModal: React.FC<CreateBookingModalProps> = ({ isOpen, onClose, onSubmit, classroom, startTime, endTime }) => {
-    const teachers = MOCK_USERS.filter(u => u.role === Role.DOCENTE);
+    const { users } = useAuth();
+    const teachers = users.filter(u => u.role === Role.DOCENTE);
 
     const [faculty, setFaculty] = useState<Faculty>(Faculty.HEALTH_SCIENCES);
     const [career, setCareer] = useState(MOCK_FACULTIES_CAREERS[Faculty.HEALTH_SCIENCES][0]);
@@ -47,7 +50,7 @@ const CreateBookingModal: React.FC<CreateBookingModalProps> = ({ isOpen, onClose
         if (isOpen) {
             resetForm();
         }
-    }, [isOpen]);
+    }, [isOpen, teachers]);
 
 
     const handleClose = () => {
