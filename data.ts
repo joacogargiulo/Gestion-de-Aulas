@@ -126,7 +126,6 @@ export const MOCK_FACULTIES_CAREERS: { [key in Faculty]: string[] } = {
     'Ingeniería en Informática',
     'Ingeniería en Inteligencia Artificial',
     'Tecnicatura Universitaria en Automatización y Robótica',
-    'Tecnicatura universitaria en Informática',
     'Tecnicatura universitaria en Desarrollo y Calidad de Software',
     'Licenciatura en Diseño de Interiores',
     'Licenciatura en Diseño Gráfico',
